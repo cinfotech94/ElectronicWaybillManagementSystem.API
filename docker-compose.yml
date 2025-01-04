@@ -1,0 +1,83 @@
+version: '3.9' # Specify Docker Compose version
+
+services:
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    ports:
+      - "5435:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: AlgebraCInfotech
+      POSTGRES_DB: ElectronicWaybillManagementServices
+    volumes:
+      - electronicwaybillpostgres-data:/var/lib/postgresql/data
+    networks:
+      - electronicwaybillnetwork
+      
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    ports:
+      - "27019:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: AlgebraCInfotech
+    volumes:
+      - electronicwaybillmongo-data:/data/db
+    networks:
+      - electronicwaybillnetwork
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.9.2
+    container_name: elasticsearch
+    environment:
+      - node.name=elasticsearch
+      - discovery.type=single-node
+      - ELASTIC_USERNAME=admin
+      - ELASTIC_PASSWORD=AlgebraCInfotech
+      - xpack.security.enabled=false
+      - xpack.security.transport.ssl.enabled=false
+      - xpack.security.http.ssl.enabled=false
+    ports:
+      - "9201:9200"
+    networks:
+      - electronicwaybillnetwork
+
+  electronicwaybillmanagementsystem.api:
+    image: ${DOCKER_REGISTRY-}electronicwaybillmanagementsystemapi
+    build:
+      context: .
+      dockerfile: ElectronicWaybillManagementSystem.API/Dockerfile
+    depends_on:
+      - elasticsearch
+      - postgres
+      - mongodb
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: AlgebraCInfotech
+      MONGO_HOST: mongodb
+      MONGO_PORT: 27017
+      MONGO_USERNAME: root
+      MONGO_PASSWORD: AlgebraCInfotech
+      ELASTIC_HOST: elasticsearch
+      ELASTIC_PORT: 9200
+    networks:
+      - electronicwaybillnetwork
+
+volumes:
+  electronicwaybillpostgres-data:
+  electronicwaybillmongo-data:
+
+networks:
+  electronicwaybillnetwork:
+    driver: bridge
+
+# services:
+#   electronicwaybillmanagementsystem.api:
+#     image: ${DOCKER_REGISTRY-}electronicwaybillmanagementsystemapi
+#     build:
+#       context: .
+#       dockerfile: ElectronicWaybillManagementSystem.API/Dockerfile
