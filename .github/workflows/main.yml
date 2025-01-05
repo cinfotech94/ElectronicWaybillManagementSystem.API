@@ -46,23 +46,6 @@ jobs:
           git checkout development
           git merge master --no-edit
           git push origin development
-          
-      # fetch collaborator
-      - name: Fetch Collaborators
-        if: always()
-        id: fetch_collaborators
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const collaborators = await github.rest.repos.listCollaborators({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-            });
-      
-            // Collect collaborator emails (if available, e.g., stored manually or fetched)
-            const emails = collaborators.data.map(collab => collab.email || `${collab.login}@example.com`);
-            core.setOutput('emails', emails.join(','));
-          result-encoding: string
 
       # Send email notification with status
       - name: Send Email Notification
@@ -74,7 +57,9 @@ jobs:
           username: ${{ secrets.EMAIL_USERNAME }}
           password: ${{ secrets.EMAIL_PASSWORD }}
           subject: Build Status - ${{ github.repository }}
-          to: ${{ steps.fetch_collaborators.outputs.emails }}
+          to: |
+              iyusuf023112@gmail.com
+              cinfotech1194@gmail.com
           body: |
             Hello ${{ github.actor }},
 
