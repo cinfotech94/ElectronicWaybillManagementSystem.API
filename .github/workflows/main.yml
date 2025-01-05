@@ -1,0 +1,90 @@
+name: Docker Build and Deploy
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    env:
+      DOCKER_BUILDKIT: 1
+
+    steps:
+      # Checkout the repository
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # Set up Docker Buildx
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      # Build and run Docker Compose
+      - name: Build and Test with Docker Compose
+        run: |
+          docker compose -f docker-compose.yml up --build --detach
+          docker compose ps
+          sleep 10 # Wait for services to stabilize
+          docker compose logs || true
+
+      # Check service health (optional)
+      - name: Check Service Health
+        if: success()
+        run: |
+          curl -f http://localhost:9201 || exit 1 # Check Elasticsearch service
+          curl -f http://localhost:5435 || exit 1 # Check PostgreSQL service
+
+      # Push changes to the development branch if successful
+      - name: Push to Development Branch
+        if: success()
+        run: |
+          git config --global user.name "${{ github.actor }}"
+          git config --global user.email "${{ github.event.pusher.email }}"
+          git fetch origin
+          git checkout development
+          git merge master --no-edit
+          git push origin development
+          
+      # fetch collaborator
+      - name: Fetch Collaborators
+        if: always()
+        id: fetch_collaborators
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const collaborators = await github.rest.repos.listCollaborators({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+            });
+      
+            // Collect collaborator emails (if available, e.g., stored manually or fetched)
+            const emails = collaborators.data.map(collab => collab.email || `${collab.login}@example.com`);
+            core.setOutput('emails', emails.join(','));
+          result-encoding: string
+
+      # Send email notification with status
+      - name: Send Email Notification
+        if: always()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 587
+          username: ${{ secrets.EMAIL_USERNAME }}
+          password: ${{ secrets.EMAIL_PASSWORD }}
+          subject: Build Status - ${{ github.repository }}
+          to: ${{ steps.fetch_collaborators.outputs.emails }}
+          body: |
+            Hello ${{ github.actor }},
+
+            Your push to the `master` branch has been processed.
+
+            Build Status: ${{ job.status }}
+            
+            If successful, the changes have been pushed to the `development` branch.
+
+            Regards,
+            GitHub Actions Bot
+          from: GitHub Actions <admin@ElectronicWaybill.com>
+
