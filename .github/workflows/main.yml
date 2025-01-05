@@ -34,6 +34,7 @@ jobs:
         if: success()
         run: |
           curl -f http://localhost:9201 || exit 1 # Check Elasticsearch service
+          curl -f http://localhost:27019 || exit 1 # Check mongodb service
           curl -f http://localhost:5435 || exit 1 # Check PostgreSQL service
 
       # Push changes to the development branch if successful
@@ -57,9 +58,7 @@ jobs:
           username: ${{ secrets.EMAIL_USERNAME }}
           password: ${{ secrets.EMAIL_PASSWORD }}
           subject: Build Status - ${{ github.repository }}
-          to: |
-              iyusuf023112@gmail.com
-              cinfotech1194@gmail.com
+          to: iyusuf023112@gmail.com, cinfotech1194@gmail.com
           body: |
             Hello ${{ github.actor }},
 
