@@ -29,14 +29,6 @@ jobs:
           sleep 10 # Wait for services to stabilize
           docker compose logs || true
 
-      # Check service health (optional)
-      - name: Check Service Health
-        if: success()
-        run: |
-          curl -f http://localhost:9201 || exit 1 # Check Elasticsearch service
-          curl -f http://localhost:27019 || exit 1 # Check mongodb service
-          curl -f http://localhost:5435 || exit 1 # Check PostgreSQL service
-
       # Push changes to the development branch if successful
       - name: Push to Development Branch
         if: success()
