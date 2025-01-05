@@ -1,7 +1,7 @@
 name: Docker Build and Deploy
 
 on:
-  push:
+  pull_request:
     branches:
       - master
 
@@ -28,7 +28,24 @@ jobs:
           docker compose ps
           sleep 10 # Wait for services to stabilize
           docker compose logs || true
+ 
+ # Accept the Pull Request if Successful
+      - name: Merge Pull Request
+        if: success()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUBTOKEN }}
+        run: |
+          echo "Merging pull request #${{ github.event.pull_request.number }}..."
+          gh pr merge ${{ github.event.pull_request.number }} --admin --merge --delete-branch
 
+      # Reject the Pull Request if Failed
+      - name: Reject Pull Request
+        if: failure()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUBTOKEN }}
+        run: |
+          echo "Closing pull request #${{ github.event.pull_request.number }} due to build failure..."
+          gh pr close ${{ github.event.pull_request.number }}
       # Push changes to the development branch if successful
       - name: Replace Development Branch with Master
         if: success()
