@@ -30,15 +30,23 @@ jobs:
           docker compose logs || true
 
       # Push changes to the development branch if successful
-      - name: Push to Development Branch
+      - name: Replace Development Branch with Master
         if: success()
         run: |
           git config --global user.name "${{ github.actor }}"
           git config --global user.email "${{ github.event.pusher.email }}"
+      
+          # Fetch the latest branches
           git fetch origin
-          git checkout development
-          git merge master --no-edit
-          git push origin development
+      
+          # Switch to the master branch and ensure it's up to date
+          git checkout master
+          git pull origin master
+      
+          # Forcefully reset development to match master
+          git branch -D development || true
+          git checkout -b development
+          git push origin development --force
 
       # Send email notification with status
       - name: Send Email Notification
