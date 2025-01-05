@@ -31,6 +31,7 @@ jobs:
 
       # Check service health (optional)
       - name: Check Service Health
+        if: success()
         run: |
           curl -f http://localhost:9201 || exit 1 # Check Elasticsearch service
           curl -f http://localhost:5435 || exit 1 # Check PostgreSQL service
@@ -48,6 +49,7 @@ jobs:
           
       # fetch collaborator
       - name: Fetch Collaborators
+        if: always()
         id: fetch_collaborators
         uses: actions/github-script@v6
         with:
@@ -64,6 +66,7 @@ jobs:
 
       # Send email notification with status
       - name: Send Email Notification
+        if: always()
         uses: dawidd6/action-send-mail@v3
         with:
           server_address: smtp.office365.com
