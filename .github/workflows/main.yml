@@ -57,7 +57,9 @@ jobs:
           username: ${{ secrets.EMAIL_USERNAME }}
           password: ${{ secrets.EMAIL_PASSWORD }}
           subject: Build Status - ${{ github.repository }}
-          to: ${{ github.event.pusher.email }}
+          to: |
+              iyusuf023112@gmail.com
+              cinfotech1194@gmail.com
           body: |
             Hello ${{ github.actor }},
 
