@@ -18,7 +18,7 @@ namespace ElectronicWaybillManagementSystem.Data.Context
 
         {
 
-            optionsBuilder.UseNpgsql("Host=localhost;Port=5435;Username=postgres;Password=AlgebraCInfotech;Database=ElectronicWaybillManagementServices;", x => x.MigrationsAssembly("ElectronicWaybillManagementSystem.Data"));
+            optionsBuilder.UseNpgsql("Host=postgres;Port=5432;Username=postgres;Password=AlgebraCInfotech;Database=ElectronicWaybillManagementServices;", x => x.MigrationsAssembly("ElectronicWaybillManagementSystem.Data"));
 
         }
         protected override void OnModelCreating(ModelBuilder modelBuilder)

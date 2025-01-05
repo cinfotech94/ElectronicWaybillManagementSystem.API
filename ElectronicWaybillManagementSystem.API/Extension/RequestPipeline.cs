@@ -1,5 +1,7 @@
 ﻿using ElectronicWaybillManagementSystem.API.Midlleware;
 using ElectronicWaybillManagementSystem.API.Midlleware.SecurityHeader;
+using ElectronicWaybillManagementSystem.Data.Context;
+using Microsoft.EntityFrameworkCore;
 
 namespace ElectronicWaybillManagementSystem.API.Extension
 {
@@ -9,6 +11,7 @@ namespace ElectronicWaybillManagementSystem.API.Extension
         {
             try
             {
+                RequestPipeline.ApplyMigration(app);
                 app.UseMiddleware<InboundLoging>();
                 //app.UseMiddleware<ContentSecurityPolicy>();
                 //app.UseMiddleware<PermissionPolicy>();
@@ -40,6 +43,18 @@ namespace ElectronicWaybillManagementSystem.API.Extension
 
             }
 
+        }
+        public static void ApplyMigration(WebApplication app)
+        {
+            using (var scope = app.Services.CreateScope())
+            {
+                var services = scope.ServiceProvider;
+                var dbContext = services.GetRequiredService<ApplicationDbContext>();
+                if (dbContext.Database.GetPendingMigrations().Count() > 0)
+                {
+                    dbContext.Database.Migrate();
+                }
+            }
         }
     }
 }
