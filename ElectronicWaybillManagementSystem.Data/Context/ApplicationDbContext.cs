@@ -18,12 +18,12 @@ namespace ElectronicWaybillManagementSystem.Data.Context
 
         {
 
-            optionsBuilder.UseNpgsql("Host=localhost;Port=5432;Username=postgres;Password=AlgebraCInfotech;Database=ElectronicWaybillManagementServices;");
+            optionsBuilder.UseNpgsql("Host=localhost;Port=5435;Username=postgres;Password=AlgebraCInfotech;Database=ElectronicWaybillManagementServices;", x => x.MigrationsAssembly("ElectronicWaybillManagementSystem.Data"));
 
         }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            //base.OnModelCreating(modelBuilder);
+            base.OnModelCreating(modelBuilder);
             //modelBuilder.Entity<User>()
             //    .HasIndex(c=>new { c.Email, c.id })
             //    .HasDatabaseName("email,id");

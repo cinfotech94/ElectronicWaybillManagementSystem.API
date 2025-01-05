@@ -11,14 +11,14 @@ namespace ElectronicWaybillManagementSystem.API.Midlleware
             _next = next;
             _configuration = configuration;
         }
-        public async Task InvokeAsync(HttpContext context )
+        public async Task InvokeAsync(HttpContext context)
         {
             string supportedVersion = _configuration["supportedVersion"];
             var path = context.Request.Path;
             var pathArray = path.ToString().Split("/");
             int version = 0;
             pathArray.FirstOrDefault(u => u.StartsWith("v") && u.Length == 2 && int.TryParse(((u.ToCharArray())[1]).ToString(), out version));
-            if (!supportedVersion.Contains(version.ToString()))
+            if (!supportedVersion.Contains(version.ToString())&&!path.ToString().Contains("/swagger"))
             {
                 context.Response.StatusCode = 400;
                 await context.Response.WriteAsync("Unsupported version");
